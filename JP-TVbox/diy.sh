@@ -14,7 +14,7 @@ sed -i 's/192.168.1.1/192.168.50.2/g' package/base-files/files/bin/config_genera
 
 
 # Add packages
-#添加科学上网源
+git clone --depth=1 https://github.com/rufengsuixing/luci-app-adguardhome package/luci-app-adguardhome
 git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
 git clone --depth 1 https://github.com/ophub/luci-app-amlogic package/amlogic
 git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall
