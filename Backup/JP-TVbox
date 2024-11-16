@@ -139,6 +139,7 @@ jobs:
         df -hT
         mkdir upload
         cp openwrt/bin/targets/*/*/*.tar.gz upload/
+
     - name: Package OpenWrt Firmware
       if: ${{ env.compile_status }} == 'success' && !cancelled()
       uses: unifreq/openwrt_packit@master
