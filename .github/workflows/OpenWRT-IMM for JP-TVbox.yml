@@ -133,13 +133,7 @@ jobs:
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "compile_status=success" >> $GITHUB_ENV
-    - name: copy to upload file
-      if: (!cancelled())
-      run: |
-        df -hT
-        mkdir upload
-        cp openwrt/bin/targets/*/*/*.tar.gz upload/
-    
+
     - name: Package armsr as openwrt
       if: ${{ env.compile_status }} == 'success' && !cancelled()
       uses: unifreq/openwrt_packit@master
@@ -154,16 +148,13 @@ jobs:
         SW_FLOWOFFLOAD: 0
         SFE_FLOW: 0
         ENABLE_WIFI_K510: 0
-
-    - name: mv output to upload file
-      run: mv /opt/openwrt_packit/output/* upload/
-        
+  
     - name: Upload OpenWrt Firmware to Release
       uses: ncipollo/release-action@main
       if: ${{ env.PACKAGED_STATUS == 'success' }} && !cancelled()
       with:
         tag: immortalwrt_JP-TVbox_${{ env.PACKAGED_OUTPUTDATE }}
-        artifacts: upload/*
+        artifacts: /opt/openwrt_packit/output/*
         allowUpdates: true
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
