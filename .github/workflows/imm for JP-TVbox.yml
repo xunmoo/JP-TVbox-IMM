@@ -1,4 +1,4 @@
-name: Build OpenWRT-IMM for N1
+name: Build imm for JP-TVbox
 
 on:
   workflow_dispatch:
