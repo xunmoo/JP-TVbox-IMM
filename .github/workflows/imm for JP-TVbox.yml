@@ -143,8 +143,8 @@ jobs:
         OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/immortalwrt-armsr-armv8-generic-rootfs.tar.gz
         KERNEL_VERSION_NAME: 6.6.60
         KERNEL_AUTO_LATEST: ture
-        PACKAGE_SOC: s905d
-        WHOAMI: xunmoo
+        PACKAGE_SOC: rk3566_jp-tvbox
+        WHOAMI: Jumbotsang
         SW_FLOWOFFLOAD: 0
         SFE_FLOW: 0
 
