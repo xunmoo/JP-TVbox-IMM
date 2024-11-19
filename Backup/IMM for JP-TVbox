@@ -1,4 +1,4 @@
-name: Build ImmortalWrt for JP-TVbox
+name: Build IMM for JP-TVbox
 
 on:
   workflow_dispatch:
