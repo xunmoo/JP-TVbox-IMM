@@ -10,16 +10,17 @@ env:
   DIY_SH: JP-TVbox/diy.sh
   FILES: JP-TVbox/files
   TZ: Asia/Shanghai
+  CCACHE_DIR: /tmp/ccache
 
 jobs:
   build:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@main
-
-    - name: Free up space
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 清理磁盘空间
       uses: jlumbroso/free-disk-space@main
       with:
         tool-cache: false
@@ -30,55 +31,79 @@ jobs:
         docker-images: true
         swap-storage: true
 
-    - name: Initialize environment
+    - name: 加载编译缓存
+      uses: actions/cache@v3
+      with:
+        path: /tmp/ccache
+        key: ccache-${{github.workflow}}-${{github.ref}}-${{github.sha}}
+        restore-keys: |
+          ccache-${{github.workflow}}-${{github.ref}}-
+          ccache-${{github.workflow}}-
+          ccache-
+
+    - name: 初始化编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
         sudo -E apt-get -qq update -y
+        # 安装编译所需软件包
+        sudo -E apt-get -qq install -y ccache
         sudo -E apt-get -qq install -y $(curl -fsSL https://raw.githubusercontent.com/nantayo/My-Pkg/master/2305)
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
+        # 配置编译缓存
+        ccache -M 10G
+        ccache -o compression=true
+        ccache -o compression_level=9
 
-    - name: Clone source code
+    - name: 克隆源代码
       working-directory: /workdir
       run: |
         git clone $REPO_URL -b $REPO_BRANCH --single-branch --depth=1 openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
-    - name: Update & Install feeds
+    - name: 更新并安装软件源
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
         ./scripts/feeds install -a
+        # 开启多线程
+        sed -i 's/jobs:=1/jobs:=$(nproc)/g' include/host-build.mk
+        sed -i 's/jobs:=1/jobs:=$(nproc)/g' include/package.mk
 
-    - name: Load custom config
+    - name: 加载自定义配置
       run: |
         [ -e $FILES ] && mv $FILES openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x $DIY_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_SH
+        # 启用编译缓存
+        echo 'CONFIG_CCACHE=y' >> .config
 
-    - name: Download package
+    - name: 下载软件包
       working-directory: ./openwrt
       run: |
         make defconfig
-        make download -j8
+        # 并行下载
+        make download -j16 || make download -j1 V=s
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: Compile the firmware
+    - name: 编译固件
       run: |
         chmod -R 755 openwrt
         cd openwrt
-        echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 || make -j1 V=s
+        # 设置编译线程
+        thread_count=$(($(nproc) + 1))
+        echo -e "使用 $thread_count 线程进行编译"
+        make -j$thread_count || make -j1 || make -j1 V=s
         echo "compile_status=success" >> $GITHUB_ENV
 
-    - name: Package armsr as openwrt
+    - name: 打包固件
       if: ${{ env.compile_status }} == 'success' && !cancelled()
       uses: unifreq/openwrt_packit@master
       env:
@@ -92,7 +117,7 @@ jobs:
         SW_FLOWOFFLOAD: 0
         SFE_FLOW: 0
 
-    - name: Upload OpenWrt Firmware to Release
+    - name: 发布固件
       uses: ncipollo/release-action@main
       if: ${{ env.PACKAGED_STATUS == 'success' }} && !cancelled()
       with:
@@ -107,10 +132,10 @@ jobs:
           账户: root
           密码: password
 
-    - name: Delete old releases
+    - name: 清理旧版本
       uses: dev-drprasad/delete-older-releases@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         keep_latest: 2
-        delete_tags : true
+        delete_tags: true
