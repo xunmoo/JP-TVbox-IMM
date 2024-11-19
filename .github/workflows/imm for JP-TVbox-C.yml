@@ -78,7 +78,6 @@ jobs:
         ccache: 'true'
         mixkey: JP-TVbox-${{ env.REPO_BRANCH }}
         prefix: ${{ github.workspace }}/openwrt
-        ccache-size: 10G
         
     - name: 更新并安装feeds
       working-directory: ./openwrt
