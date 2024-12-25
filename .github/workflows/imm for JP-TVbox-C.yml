@@ -28,18 +28,18 @@ jobs:
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)"
         df -Th
-        
-    - name: 优化磁盘空间
-      uses: "hugoalh/disk-space-optimizer-ghaction@v0.8.1"
-      with:
-        operate_sudo: "True"
-        docker_prune: "True"
-        docker_clean: "True"
-        apt_prune: "True"
-        apt_clean: "True"
-        npm_prune: "True"
-        os_swap: "True"
 
+    - name: 清理系统空间
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        sudo apt-get clean
+        sudo apt-get autoremove -y
+        docker system prune -af
+        
     - name: 最大化构建空间
       uses: easimon/maximize-build-space@master
       with: 
