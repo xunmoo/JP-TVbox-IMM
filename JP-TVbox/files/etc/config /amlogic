@@ -10,6 +10,6 @@ config amlogic 'config'
 	option amlogic_shared_fstype 'ext4'
 
 config settings 'armcpu'
-	option governor0 'performance'
+	option governor0 'Schedutil'
 	option minfreq0 '1608000'
 	option maxfreq0 '1992000'
