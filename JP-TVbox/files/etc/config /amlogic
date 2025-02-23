@@ -1,7 +1,7 @@
 config amlogic 'config'
 	option enable '1'
 	option amlogic_firmware_repo 'https://github.com/jumbotsang/JP-TVbox-IMM'
-	option amlogic_firmware_tag 'immortalwrt'
+	option amlogic_firmware_tag 'OpenWrt'
 	option amlogic_firmware_suffix '.img.xz'
 	option amlogic_kernel_path 'https://github.com/breakingbadboy/OpenWrt'
 	option amlogic_kernel_branch '6.6'
