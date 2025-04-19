@@ -6,7 +6,6 @@ on:
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: openwrt-24.10
-  BRANCH_AUTO_LATEST: true
   CONFIG_FILE: JP-TVbox/.config
   DIY_SH: JP-TVbox/diy.sh
   FILES: JP-TVbox/files
