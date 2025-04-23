@@ -5,7 +5,7 @@ on:
 
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
-  REPO_TAG: 24.10.1
+  REPO_BRANCH: openwrt-24.10
   CONFIG_FILE: JP-TVbox/.config
   DIY_SH: JP-TVbox/diy.sh
   FILES: JP-TVbox/files
@@ -51,7 +51,7 @@ jobs:
     - name: Clone source code
       working-directory: /workdir
       run: |
-        git clone $REPO_URL -b $REPO_TAG --single-branch --depth=1 openwrt
+        git clone $REPO_URL -b $REPO_BRANCH --single-branch --depth=1 openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
     
     - name: Update & Install feeds
